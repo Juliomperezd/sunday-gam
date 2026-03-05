@@ -394,6 +394,33 @@
     100% { opacity: 0; }
   }
 
+  /* ─── Polaroid drop ──────────────────────────── */
+  .polaroid-drop {
+    position: fixed;
+    z-index: 201;
+    width: 104px;
+    background: #fff;
+    padding: 7px 7px 26px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.2);
+    pointer-events: none;
+    transform-origin: center center;
+    animation: polaroidFall 1.3s cubic-bezier(0.4, 0, 0.8, 1) forwards;
+  }
+
+  .polaroid-drop img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1);
+  }
+
+  @keyframes polaroidFall {
+    0%   { opacity: 1;   transform: rotate(var(--r0)) translateY(0px); }
+    60%  { opacity: 1; }
+    100% { opacity: 0;   transform: rotate(var(--r1)) translateY(300px); }
+  }
+
   /* ─── Responsive ──────────────────────────────── */
   @media (max-width: 480px) {
     .card { width: 62px; height: 92px; }
@@ -718,6 +745,34 @@ function bustFlash() {
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 450);
 }
+
+// ─── Polaroid hover effect (intro only) ──────────────────────────────────
+const PHOTOS = ['Ph/1.png', 'Ph/2.jpeg', 'Ph/3.jpeg'];
+let photoIdx = 0;
+let lastSpawn = 0;
+
+document.getElementById('intro').addEventListener('mousemove', (e) => {
+  const now = Date.now();
+  if (now - lastSpawn < 110) return;
+  lastSpawn = now;
+
+  const src  = PHOTOS[photoIdx % PHOTOS.length];
+  photoIdx++;
+
+  const el   = document.createElement('div');
+  el.className = 'polaroid-drop';
+
+  const r0 = ((Math.random() - 0.5) * 28).toFixed(1);
+  const r1 = (parseFloat(r0) + (Math.random() - 0.5) * 22).toFixed(1);
+  el.style.setProperty('--r0', `${r0}deg`);
+  el.style.setProperty('--r1', `${r1}deg`);
+  el.style.left = `${e.clientX - 52}px`;
+  el.style.top  = `${e.clientY - 16}px`;
+
+  el.innerHTML = `<img src="${src}" alt="">`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1350);
+});
 
 // ─── Intro dismiss ────────────────────────────────────────────────────────
 document.getElementById('btn-start').addEventListener('click', () => {
