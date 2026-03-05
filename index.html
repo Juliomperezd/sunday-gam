@@ -752,6 +752,7 @@ let photoIdx = 0;
 let lastSpawn = 0;
 
 document.getElementById('intro').addEventListener('mousemove', (e) => {
+  if (e.target.closest('button')) return;
   const now = Date.now();
   if (now - lastSpawn < 110) return;
   lastSpawn = now;
