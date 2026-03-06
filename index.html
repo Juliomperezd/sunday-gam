@@ -747,38 +747,60 @@ function bustFlash() {
 }
 
 // ─── Polaroid hover effect (intro only) ──────────────────────────────────
-const PHOTOS = ['Ph/1.png', 'Ph/2.jpeg', 'Ph/3.jpeg'];
+const PHOTOS = ['Ph/1.png', 'Ph/2.jpeg', 'Ph/3.jpeg', 'Ph/4.png'];
 let photoIdx = 0;
 let lastSpawn = 0;
 
-document.getElementById('intro').addEventListener('mousemove', (e) => {
-  if (e.target.closest('button')) return;
-  const now = Date.now();
-  if (now - lastSpawn < 110) return;
-  lastSpawn = now;
-
-  const src  = PHOTOS[photoIdx % PHOTOS.length];
+function spawnPolaroid(x, y) {
+  const src = PHOTOS[photoIdx % PHOTOS.length];
   photoIdx++;
 
-  const el   = document.createElement('div');
+  const el = document.createElement('div');
   el.className = 'polaroid-drop';
 
   const r0 = ((Math.random() - 0.5) * 28).toFixed(1);
   const r1 = (parseFloat(r0) + (Math.random() - 0.5) * 22).toFixed(1);
   el.style.setProperty('--r0', `${r0}deg`);
   el.style.setProperty('--r1', `${r1}deg`);
-  el.style.left = `${e.clientX - 52}px`;
-  el.style.top  = `${e.clientY - 16}px`;
+  el.style.left = `${x - 52}px`;
+  el.style.top  = `${y - 16}px`;
 
   el.innerHTML = `<img src="${src}" alt="">`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1350);
+}
+
+// Desktop: follow mouse
+document.getElementById('intro').addEventListener('mousemove', (e) => {
+  if (e.target.closest('button')) return;
+  const now = Date.now();
+  if (now - lastSpawn < 110) return;
+  lastSpawn = now;
+  spawnPolaroid(e.clientX, e.clientY);
 });
+
+// Mobile: auto-spawn at random positions
+const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+let mobileInterval = null;
+
+if (isTouchDevice) {
+  mobileInterval = setInterval(() => {
+    const intro = document.getElementById('intro');
+    if (!intro || intro.style.display === 'none') {
+      clearInterval(mobileInterval);
+      return;
+    }
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * (window.innerHeight * 0.75);
+    spawnPolaroid(x, y);
+  }, 600);
+}
 
 // ─── Intro dismiss ────────────────────────────────────────────────────────
 document.getElementById('btn-start').addEventListener('click', () => {
   const intro = document.getElementById('intro');
   intro.classList.add('hiding');
+  clearInterval(mobileInterval);
   setTimeout(() => { intro.style.display = 'none'; }, 450);
   newGame();
 });
